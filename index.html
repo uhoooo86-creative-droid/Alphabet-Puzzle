@@ -1,992 +1,301 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BIGCAT JUKEBOX</title>
-<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Hahmlet:wght@400;700;900&family=Noto+Serif+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Big Cat Alphabet Puzzle</title>
 <style>
-/* ═══════════════════════════════════════
-   오방색 OBANGSAEK PALETTE
-   청(靑) 적(赤) 황(黃) 백(白) 흑(黑)
-═══════════════════════════════════════ */
 :root {
-  --cheong: #3d7fff;   /* 청 — SJ Stable */
-  --cheong-dark: #1a4acc;
-  --cheong-light: #85b8ff;
-
-  --jeok: #ff3f3f;     /* 적 — EP Activity */
-  --jeok-dark: #c01a1a;
-  --jeok-light: #ff8c8c;
-
-  --hwang: #ffbf00;    /* 황 — IF Prepared */
-  --hwang-dark: #cc8800;
-  --hwang-light: #ffe066;
-
-  --baek: #f0ebe0;     /* 백 — FN Relationship */
-  --baek-dark: #a09880;
-  --baek-light: #faf7f0;
-
-  --heuk: #2a2a2a;     /* 흑 — TJ Learning */
-  --heuk-dark: #0a0a0a;
-  --heuk-light: #666666;
-
-  --bg: #0c0c0c;
-  --text: #f5f0e8;
-  --muted: rgba(245,240,232,0.5);
+  --cream:#fff8ef;
+  --paper:#fffdf9;
+  --coral:#f46b5f;
+  --red:#e45b4c;
+  --ink:#2d2d2d;
+  --blue:#4a86d9;
+  --line:#222;
+  --shadow:0 10px 24px rgba(0,0,0,.10);
+  --radius:24px;
 }
-
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-
-html { scroll-behavior: smooth; }
-
+* { box-sizing:border-box; }
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Hahmlet', 'Noto Serif KR', serif;
-  min-height: 100vh;
-  overflow-x: hidden;
-  transition: background 0.7s ease;
+  margin:0; background:linear-gradient(180deg,#fff7ef 0%,#fff2e6 100%);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  color:var(--ink);
 }
+.app {
+  max-width:980px; margin:0 auto; padding:16px 16px 32px;
+}
+.card {
+  background:var(--paper); border:4px solid var(--line); border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+header.card {
+  padding:16px 18px; margin-bottom:14px;
+  display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+}
+.title {
+  display:flex; align-items:center; gap:12px;
+}
+.badge {
+  width:56px; height:56px; border-radius:18px;
+  background:linear-gradient(180deg,var(--coral),var(--red)); color:#fff;
+  display:flex; align-items:center; justify-content:center; font-weight:900; font-size:28px;
+  border:3px solid var(--line);
+}
+h1 { font-size:28px; margin:0; }
+.sub { font-size:14px; opacity:.75; margin-top:4px; }
 
-/* ── THEME TRANSITIONS (body class) ── */
-body.theme-cheong { background: #061840; }
-body.theme-jeok   { background: #3a0808; }
-body.theme-hwang  { background: #2a1c00; }
-body.theme-baek   { background: #28261e; }
-body.theme-heuk   { background: #0a0a0a; }
-
-/* ═══════════════════════════════════════
-   SCREEN SYSTEM
-═══════════════════════════════════════ */
-.screen { display:none; min-height:100vh; }
-.screen.active { display:flex; flex-direction:column; }
-
-/* ═══════════════════════════════════════
-   SCREEN 1 — INTRO / MBTI STYLE
-═══════════════════════════════════════ */
-#screen-intro {
-  background: #0c0c0c;
-  position: relative;
-  overflow: hidden;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-}
-
-/* animated bg circles */
-#screen-intro::before {
-  content:'';
-  position: absolute;
-  width: 600px; height: 600px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(26,92,255,0.08) 0%, transparent 70%);
-  top: -150px; left: -150px;
-  animation: float1 8s ease-in-out infinite;
-  pointer-events: none;
-}
-#screen-intro::after {
-  content:'';
-  position: absolute;
-  width: 500px; height: 500px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(212,43,43,0.07) 0%, transparent 70%);
-  bottom: -100px; right: -100px;
-  animation: float2 10s ease-in-out infinite;
-  pointer-events: none;
-}
-
-@keyframes float1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(40px,40px)} }
-@keyframes float2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-30px,-30px)} }
-
-.intro-inner {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 640px;
-  text-align: center;
-}
-
-.intro-eyebrow {
-  font-family: 'Black Han Sans', sans-serif;
-  font-size: 0.65rem;
-  letter-spacing: 8px;
-  color: var(--muted);
-  text-transform: uppercase;
-  margin-bottom: 16px;
-  animation: fadeUp 0.8s ease both;
-}
-
-.intro-logo {
-  font-family: 'Black Han Sans', sans-serif;
-  font-size: clamp(2.8rem, 10vw, 5rem);
-  line-height: 1;
-  color: var(--text);
-  margin-bottom: 8px;
-  animation: fadeUp 0.8s 0.1s ease both;
-}
-.intro-logo span {
-  display: inline-block;
-  color: var(--cheong);
-  animation: colorCycle 6s ease infinite;
-}
-
-@keyframes colorCycle {
-  0%,100% { color: var(--cheong); }
-  20% { color: var(--jeok); }
-  40% { color: var(--hwang); }
-  60% { color: var(--baek); }
-  80% { color: var(--heuk-light); }
-}
-
-.intro-subtitle {
-  font-size: 1rem;
-  color: var(--muted);
-  margin-bottom: 48px;
-  animation: fadeUp 0.8s 0.2s ease both;
-  font-weight: 400;
-}
-
-/* Obangsaek pentagon decoration */
-.obangsaek-deco {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 48px;
-  animation: fadeUp 0.8s 0.3s ease both;
-}
-.ob-dot {
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  animation: obPulse 3s ease-in-out infinite;
-}
-.ob-dot:nth-child(1) { background: var(--cheong); animation-delay:0s; }
-.ob-dot:nth-child(2) { background: var(--jeok); animation-delay:0.3s; }
-.ob-dot:nth-child(3) { background: var(--hwang); animation-delay:0.6s; }
-.ob-dot:nth-child(4) { background: var(--baek); animation-delay:0.9s; }
-.ob-dot:nth-child(5) { background: #888; animation-delay:1.2s; }
-
-@keyframes obPulse {
-  0%,100% { transform:scale(1); opacity:0.7; }
-  50% { transform:scale(1.6); opacity:1; }
-}
-
-.intro-question {
-  font-family: 'Black Han Sans', sans-serif;
-  font-size: clamp(1.1rem, 4vw, 1.5rem);
-  color: var(--text);
-  margin-bottom: 32px;
-  animation: fadeUp 0.8s 0.35s ease both;
-  line-height: 1.4;
-}
-
-/* TEACHER SELECTOR — 5 tall cards */
-.teacher-selector {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-  animation: fadeUp 0.8s 0.45s ease both;
-  margin-bottom: 16px;
-}
-
-@media(max-width:520px) {
-  .teacher-selector {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  .teacher-selector .tc-card:nth-child(5) {
-    grid-column: 1 / -1;
-  }
-}
-
-.tc-card {
-  border: 2px solid rgba(245,240,232,0.12);
-  border-radius: 20px;
-  padding: 22px 10px;
-  cursor: pointer;
-  transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
-  position: relative;
-  overflow: hidden;
-  background: rgba(255,255,255,0.03);
-  text-align: center;
-}
-
-.tc-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transition: opacity 0.4s;
-  border-radius: 18px;
-}
-
-/* Per-card color fills */
-.tc-card[data-t="1"]::before { background: linear-gradient(160deg, rgba(26,92,255,0.3), rgba(10,42,138,0.5)); }
-.tc-card[data-t="2"]::before { background: linear-gradient(160deg, rgba(212,43,43,0.3), rgba(122,15,15,0.5)); }
-.tc-card[data-t="3"]::before { background: linear-gradient(160deg, rgba(232,168,0,0.3), rgba(122,84,0,0.5)); }
-.tc-card[data-t="4"]::before { background: linear-gradient(160deg, rgba(232,224,208,0.2), rgba(122,112,96,0.4)); }
-.tc-card[data-t="5"]::before { background: linear-gradient(160deg, rgba(80,80,80,0.3), rgba(0,0,0,0.6)); }
-
-.tc-card:hover { transform: translateY(-6px) scale(1.03); border-color: rgba(245,240,232,0.3); }
-.tc-card:hover::before { opacity: 1; }
-
-.tc-card.selected { transform: translateY(-8px) scale(1.05); }
-.tc-card[data-t="1"].selected { border-color: var(--cheong); box-shadow: 0 12px 40px rgba(61,127,255,0.6); }
-.tc-card[data-t="2"].selected { border-color: var(--jeok);   box-shadow: 0 12px 40px rgba(255,63,63,0.6); }
-.tc-card[data-t="3"].selected { border-color: var(--hwang);  box-shadow: 0 12px 40px rgba(255,191,0,0.6); }
-.tc-card[data-t="4"].selected { border-color: var(--baek);   box-shadow: 0 12px 40px rgba(240,235,224,0.4); }
-.tc-card[data-t="5"].selected { border-color: #aaa;          box-shadow: 0 12px 40px rgba(120,120,120,0.5); }
-.tc-card.selected::before { opacity: 1; }
-
-.tc-hangul {
-  position: relative;
-  z-index: 1;
-  font-family: 'Black Han Sans', sans-serif;
-  font-size: 2rem;
-  line-height: 1;
-  margin-bottom: 10px;
-  transition: transform 0.3s;
-}
-.tc-card[data-t="1"] .tc-hangul { color: var(--cheong-light); }
-.tc-card[data-t="2"] .tc-hangul { color: var(--jeok-light); }
-.tc-card[data-t="3"] .tc-hangul { color: var(--hwang-light); }
-.tc-card[data-t="4"] .tc-hangul { color: var(--baek); }
-.tc-card[data-t="5"] .tc-hangul { color: #888; }
-
-.tc-card:hover .tc-hangul { transform: scale(1.1); }
-
-.tc-mbti {
-  position: relative;
-  z-index: 1;
-  font-size: 0.6rem;
-  letter-spacing: 2px;
-  opacity: 0.6;
-  margin-bottom: 6px;
-  text-transform: uppercase;
-}
-.tc-name {
-  position: relative;
-  z-index: 1;
-  font-size: 0.72rem;
-  font-weight: 700;
-  line-height: 1.3;
-}
-.tc-ob-label {
-  position: relative;
-  z-index: 1;
-  font-size: 0.6rem;
-  margin-top: 8px;
-  opacity: 0.5;
-  font-family: 'Black Han Sans', sans-serif;
-  letter-spacing: 1px;
-}
-
-.intro-cta {
-  animation: fadeUp 0.8s 0.5s ease both;
-}
-
-/* ── BACK BTN (used in jukebox) ── */
-.back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(0,0,0,0.25);
-  border: 1px solid rgba(255,255,255,0.15);
-  color: rgba(255,255,255,0.8);
-  padding: 8px 16px;
-  border-radius: 30px;
-  cursor: pointer;
-  font-family: 'Hahmlet', serif;
-  font-size: 0.8rem;
-  transition: all 0.2s;
-  width: fit-content;
-}
-.back-btn:hover { background: rgba(0,0,0,0.4); color: #fff; }
-
-/* ── OTHER STYLES (small peek buttons) ── */
-.other-styles-section {
-  margin-top: 16px;
-}
-.other-styles-label {
-  font-size: 0.6rem;
-  letter-spacing: 3px;
-  color: rgba(255,255,255,0.3);
-  text-transform: uppercase;
-  margin-bottom: 10px;
-  text-align: center;
-}
-.other-styles-row {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-.other-style-btn {
-  background: rgba(0,0,0,0.25);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 30px;
-  padding: 6px 14px;
-  cursor: pointer;
-  font-family: 'Hahmlet', serif;
-  font-size: 0.72rem;
-  color: rgba(255,255,255,0.45);
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-}
-.other-style-btn:hover {
-  background: rgba(255,255,255,0.1);
-  color: rgba(255,255,255,0.85);
-  border-color: rgba(255,255,255,0.3);
-  transform: translateY(-1px);
-}
-.other-style-btn .obs-hanja {
-  font-family: 'Black Han Sans', sans-serif;
-  font-size: 0.85rem;
-}
-
-/* ═══════════════════════════════════════
-   SCREEN 3 — JUKEBOX PLAYER
-   Full immersive colored bg
-═══════════════════════════════════════ */
-#screen-jukebox {
-  position: relative;
-  overflow: hidden;
-}
-
-.jb-bg {
-  position: absolute;
-  inset: 0;
-  transition: background 0.6s ease;
-  z-index: 0;
-}
-
-/* radial glow orbs */
-.jb-orb1, .jb-orb2 {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 0;
-  transition: background 0.6s;
-}
-.jb-orb1 { width:500px; height:500px; top:-150px; left:-150px; animation:float1 12s ease-in-out infinite; }
-.jb-orb2 { width:400px; height:400px; bottom:-100px; right:-100px; animation:float2 14s ease-in-out infinite; }
-
-.jb-content {
-  position: relative;
-  z-index: 1;
-  padding: 24px 20px 40px;
-  max-width: 600px;
-  margin: 0 auto;
-  width: 100%;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-/* TOP BAR */
-.jb-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 28px;
-}
-
-/* NOW PLAYING CARD */
-.now-playing-card {
-  background: rgba(0,0,0,0.35);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 24px;
-  padding: 24px;
-  margin-bottom: 20px;
-  backdrop-filter: blur(20px);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-}
-
-.np-top {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-
-.disc-wrap {
-  position: relative;
-  width: 72px; height: 72px;
-  flex-shrink: 0;
-}
-.disc {
-  width: 72px; height: 72px;
-  border-radius: 50%;
-  background: conic-gradient(from 0deg, #1a1a1a 0deg, #333 60deg, #1a1a1a 120deg, #444 180deg, #1a1a1a 240deg, #333 300deg, #1a1a1a 360deg);
-  display: flex; align-items:center; justify-content:center;
-  font-size: 1.8rem;
-  position: relative;
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 4px 20px rgba(0,0,0,0.4);
-  transition: box-shadow 0.3s;
-}
-.disc.spinning {
-  animation: discSpin 4s linear infinite;
-}
-.disc-shine {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
-  pointer-events: none;
-}
-@keyframes discSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-
-.np-meta { flex:1; min-width:0; }
-.np-step-tag {
-  display: inline-block;
-  font-size: 0.6rem;
-  letter-spacing: 3px;
-  background: rgba(255,255,255,0.15);
-  color: rgba(255,255,255,0.8);
-  padding: 3px 10px;
-  border-radius: 20px;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-}
-.np-song {
-  font-family: 'Black Han Sans', sans-serif;
-  font-size: 1.2rem;
-  color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 4px;
-}
-.np-teacher {
-  font-size: 0.75rem;
-  color: rgba(255,255,255,0.5);
-}
-
-/* viz bars */
-.viz {
-  display: flex;
-  align-items: flex-end;
-  gap: 3px;
-  height: 32px;
-}
-.viz-bar {
-  width: 4px;
-  background: rgba(255,255,255,0.6);
-  border-radius: 2px;
-  height: 6px;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-.viz.on .viz-bar { opacity: 1; animation: vizAnim 0.5s ease-in-out infinite alternate; }
-.viz-bar:nth-child(1) { animation-delay:0s; }
-.viz-bar:nth-child(2) { animation-delay:0.08s; }
-.viz-bar:nth-child(3) { animation-delay:0.16s; }
-.viz-bar:nth-child(4) { animation-delay:0.04s; }
-.viz-bar:nth-child(5) { animation-delay:0.12s; }
-@keyframes vizAnim { from{height:4px} to{height:28px} }
-
-/* progress */
-.progress-track {
-  height: 5px;
-  background: rgba(255,255,255,0.15);
-  border-radius: 3px;
-  cursor: pointer;
-  margin-bottom: 6px;
-  position: relative;
-}
-.progress-fill {
-  height: 100%;
-  background: #fff;
-  border-radius: 3px;
-  width: 0%;
-  transition: width 0.15s linear;
-  position: relative;
-}
-.progress-fill::after {
-  content:'';
-  position: absolute;
-  right: -5px; top: -3.5px;
-  width: 11px; height: 11px;
-  background: #fff;
-  border-radius: 50%;
-  box-shadow: 0 0 8px rgba(255,255,255,0.5);
-}
-.time-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.68rem;
-  color: rgba(255,255,255,0.45);
-  margin-bottom: 16px;
-}
-
-/* controls */
 .controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
-  margin-bottom: 16px;
+  display:flex; gap:10px; flex-wrap:wrap;
 }
-.ctrl {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: rgba(255,255,255,0.7);
-  font-size: 1.4rem;
-  padding: 8px;
-  transition: all 0.2s;
-  border-radius: 50%;
+button {
+  border:3px solid var(--line); border-radius:18px; padding:12px 16px; font-size:17px;
+  font-weight:800; background:#fff; cursor:pointer; box-shadow:0 4px 0 #222;
 }
-.ctrl:hover { color: #fff; transform: scale(1.15); }
-.ctrl.play {
-  background: #fff;
-  color: #000;
-  width: 60px; height: 60px;
-  border-radius: 50%;
-  font-size: 1.5rem;
-  display: flex; align-items:center; justify-content:center;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-}
-.ctrl.play:hover { transform: scale(1.08); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+button:active { transform:translateY(2px); box-shadow:0 2px 0 #222; }
+button.primary { background:linear-gradient(180deg,#ff8c73,#f46b5f); color:#fff; }
+button.blue { background:linear-gradient(180deg,#79adff,#4a86d9); color:#fff; }
+button.ghost { background:#fff9f3; }
+button[disabled] { opacity:.45; cursor:not-allowed; }
 
-/* volume */
-.vol-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.main {
+  display:grid; grid-template-columns:1.1fr .9fr; gap:16px;
 }
-.vol-icon { font-size: 0.9rem; color: rgba(255,255,255,0.4); }
-input[type=range] {
-  -webkit-appearance: none;
-  flex: 1;
-  height: 4px;
-  background: rgba(255,255,255,0.2);
-  border-radius: 2px;
-  outline: none;
-}
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  background: #fff;
-  cursor: pointer;
+@media (max-width:860px) {
+  .main { grid-template-columns:1fr; }
 }
 
-/* PLAYLIST */
-.playlist-card {
-  background: rgba(0,0,0,0.3);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 20px;
-  overflow: hidden;
-  backdrop-filter: blur(16px);
-  flex: 1;
-}
-.pl-header {
-  padding: 14px 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  font-size: 0.65rem;
-  letter-spacing: 4px;
-  color: rgba(255,255,255,0.45);
-  text-transform: uppercase;
-}
-.pl-items { padding: 8px 0; }
+.panel { padding:16px; }
 
-.pl-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 20px;
-  cursor: pointer;
-  transition: background 0.15s;
+.image-box {
+  background:#fff; border:4px solid var(--line); border-radius:24px; padding:10px;
 }
-.pl-item:hover { background: rgba(255,255,255,0.07); }
-.pl-item.active { background: rgba(255,255,255,0.12); }
-.pl-item.no-song { opacity: 0.35; cursor: default; }
-.pl-n { font-size: 0.7rem; color: rgba(255,255,255,0.35); min-width: 20px; text-align:center; }
-.pl-name { flex:1; font-size: 0.88rem; font-weight: 700; color: #fff; }
-.pl-item.active .pl-name { color: #fff; }
-.pl-step-tag {
-  font-size: 0.62rem;
-  background: rgba(255,255,255,0.12);
-  color: rgba(255,255,255,0.7);
-  padding: 2px 9px;
-  border-radius: 20px;
-}
-.pl-dur { font-size: 0.68rem; color: rgba(255,255,255,0.35); }
-
-/* ═══════════════════════════════════════
-   SHARED UI
-═══════════════════════════════════════ */
-@keyframes fadeUp {
-  from { opacity:0; transform:translateY(20px); }
-  to   { opacity:1; transform:translateY(0); }
+.image-box img {
+  width:100%; height:auto; display:block; border-radius:18px; background:#f7f7f7;
 }
 
-.btn-main {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 32px;
-  border-radius: 40px;
-  font-family: 'Black Han Sans', sans-serif;
-  font-size: 1rem;
-  cursor: pointer;
-  border: none;
-  transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  letter-spacing: 1px;
-  text-decoration: none;
+.info {
+  display:grid; grid-template-columns:1fr auto; gap:12px; align-items:center; margin:14px 0 10px;
 }
-.btn-white {
-  background: #fff;
-  color: #000;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+.big-letter {
+  font-size:60px; font-weight:1000; line-height:1; color:var(--red);
 }
-.btn-white:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
-.btn-white:disabled { opacity: 0.35; cursor:not-allowed; transform:none; }
+.phrase {
+  font-size:22px; font-weight:800; text-align:right;
+}
+.tip {
+  padding:12px 14px; border-radius:18px; border:3px dashed var(--line); background:#fff6ed;
+  font-size:15px; margin:8px 0 0;
+}
 
-.btn-ghost-white {
-  background: rgba(255,255,255,0.1);
-  color: rgba(255,255,255,0.8);
-  border: 2px solid rgba(255,255,255,0.2);
-  font-family: 'Hahmlet', serif;
-  font-size: 0.85rem;
+.slot-row, .piece-row {
+  display:flex; justify-content:center; gap:10px; flex-wrap:wrap;
 }
-.btn-ghost-white:hover { background: rgba(255,255,255,0.18); color: #fff; border-color: rgba(255,255,255,0.4); }
+
+.slot {
+  width:min(24vw,110px); height:min(24vw,110px); max-width:110px; max-height:110px;
+  min-width:86px; min-height:86px;
+  border-radius:22px; border:4px dashed #666; background:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-size:40px; font-weight:900; user-select:none;
+}
+.slot.filled {
+  background:#fff1ea; border-style:solid; color:var(--red);
+}
+
+.piece {
+  width:min(24vw,110px); height:min(24vw,110px); max-width:110px; max-height:110px;
+  min-width:86px; min-height:86px; border-radius:22px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  border:4px solid var(--line); background:linear-gradient(180deg,#fffefb,#ffe5dc);
+  box-shadow:0 6px 0 #222; user-select:none;
+  font-size:34px; font-weight:1000;
+}
+.piece small { font-size:13px; opacity:.75; font-weight:800; }
+.piece.selected { outline:6px solid #7fb0ff; transform:translateY(-3px); }
+.piece.done { visibility:hidden; }
+
+.progress {
+  display:flex; gap:6px; flex-wrap:wrap; margin-top:16px;
+}
+.dot {
+  width:20px; height:20px; border-radius:999px; border:3px solid var(--line); background:#fff;
+}
+.dot.done { background:var(--coral); }
+
+.celebrate {
+  margin-top:12px; padding:14px; border-radius:18px; border:3px solid var(--line);
+  background:#fff7c8; font-weight:900; font-size:22px; text-align:center; min-height:62px;
+}
+
+.footer-note {
+  font-size:13px; opacity:.7; text-align:center; margin-top:14px;
+}
 </style>
 </head>
 <body>
-<audio id="audio" preload="auto"></audio>
-
-<!-- ══════════════════════════════════════
-     SCREEN 1: INTRO
-══════════════════════════════════════ -->
-<div class="screen active" id="screen-intro">
-  <div class="intro-inner">
-    <div class="intro-eyebrow">BIGCAT English · Teacher Persona</div>
-    <div class="intro-logo">🐱 <span>JUKEBOX</span></div>
-    <div class="intro-subtitle">나의 수업 스타일에 맞는 음악을 찾아봐요</div>
-
-    <div class="obangsaek-deco">
-      <div class="ob-dot"></div>
-      <div class="ob-dot"></div>
-      <div class="ob-dot"></div>
-      <div class="ob-dot"></div>
-      <div class="ob-dot"></div>
-    </div>
-
-    <div class="intro-question">나는 어떤 선생님인가요?</div>
-
-    <div class="teacher-selector">
-      <!-- 청 -->
-      <div class="tc-card" data-t="1" onclick="selectTeacher(this)">
-        <div class="tc-hangul">靑</div>
-        <div class="tc-mbti">SJ</div>
-        <div class="tc-name">Stable<br>Teacher</div>
-        <div class="tc-ob-label">청 · 靑</div>
-      </div>
-      <!-- 적 -->
-      <div class="tc-card" data-t="2" onclick="selectTeacher(this)">
-        <div class="tc-hangul">赤</div>
-        <div class="tc-mbti">EP</div>
-        <div class="tc-name">Activity<br>Teacher</div>
-        <div class="tc-ob-label">적 · 赤</div>
-      </div>
-      <!-- 황 -->
-      <div class="tc-card" data-t="3" onclick="selectTeacher(this)">
-        <div class="tc-hangul">黃</div>
-        <div class="tc-mbti">IF</div>
-        <div class="tc-name">Prepared<br>Teacher</div>
-        <div class="tc-ob-label">황 · 黃</div>
-      </div>
-      <!-- 백 -->
-      <div class="tc-card" data-t="4" onclick="selectTeacher(this)">
-        <div class="tc-hangul">白</div>
-        <div class="tc-mbti">FN</div>
-        <div class="tc-name">Relationship<br>Teacher</div>
-        <div class="tc-ob-label">백 · 白</div>
-      </div>
-      <!-- 흑 -->
-      <div class="tc-card" data-t="5" onclick="selectTeacher(this)">
-        <div class="tc-hangul">黑</div>
-        <div class="tc-mbti">TJ</div>
-        <div class="tc-name">Learning<br>Teacher</div>
-        <div class="tc-ob-label">흑 · 黑</div>
+<div class="app">
+  <header class="card">
+    <div class="title">
+      <div class="badge" id="headerBadge">A</div>
+      <div>
+        <h1>빅캣 알파벳 퍼즐</h1>
+        <div class="sub">퍼즐을 맞추면 해당 알파벳 문장이 읽혀요.</div>
       </div>
     </div>
-
-    <div class="intro-cta">
-      <button class="btn-main btn-white" id="intro-next-btn" onclick="goToJukebox()" disabled>
-        🎵 나의 쥬크박스 열기
-      </button>
+    <div class="controls">
+      <button class="ghost" id="prevBtn">← 이전</button>
+      <button class="blue" id="speakBtn">🔊 다시 듣기</button>
+      <button class="primary" id="nextBtn">다음 →</button>
     </div>
-  </div>
-</div>
+  </header>
 
-<!-- ══════════════════════════════════════
-     SCREEN 3: JUKEBOX
-══════════════════════════════════════ -->
-<div class="screen" id="screen-jukebox">
-  <div class="jb-bg" id="jb-bg"></div>
-  <div class="jb-orb1" id="jb-orb1"></div>
-  <div class="jb-orb2" id="jb-orb2"></div>
-  <div class="jb-content">
-    <!-- top bar -->
-    <div class="jb-topbar">
-      <button class="back-btn" onclick="goTo('screen-style')">← 스타일 변경</button>
-      <div style="font-family:'Black Han Sans',sans-serif; font-size:0.7rem; letter-spacing:3px; color:rgba(255,255,255,0.4); text-transform:uppercase" id="jb-title-badge">Style 1</div>
+  <section class="main">
+    <div class="card panel">
+      <div class="image-box">
+        <img id="letterImage" src="" alt="알파벳 캐릭터 이미지" />
+      </div>
+      <div class="info">
+        <div class="big-letter" id="bigLetter">A</div>
+        <div class="phrase" id="phraseText">All eyes on me.</div>
+      </div>
+      <div class="tip">모바일에서도 되도록 <b>끌기</b> 대신 <b>탭해서 맞추기</b> 방식으로 만들었어요. 아래 조각을 순서대로 눌러 보세요.</div>
+      <div class="progress" id="progress"></div>
     </div>
 
-    <!-- now playing -->
-    <div class="now-playing-card">
-      <div class="np-top">
-        <div class="disc-wrap">
-          <div class="disc" id="disc">💿<div class="disc-shine"></div></div>
-        </div>
-        <div class="np-meta">
-          <div class="np-step-tag" id="np-step">— Step —</div>
-          <div class="np-song" id="np-song">곡을 선택하세요</div>
-          <div class="np-teacher" id="np-teacher">BIGCAT Jukebox</div>
-        </div>
-        <div class="viz" id="viz">
-          <div class="viz-bar"></div>
-          <div class="viz-bar"></div>
-          <div class="viz-bar"></div>
-          <div class="viz-bar"></div>
-          <div class="viz-bar"></div>
-        </div>
-      </div>
-
-      <!-- progress -->
-      <div class="progress-track" onclick="seekAudio(event)">
-        <div class="progress-fill" id="prog-fill"></div>
-      </div>
-      <div class="time-row">
-        <span id="t-cur">0:00</span>
-        <span id="t-tot">0:00</span>
-      </div>
-
-      <!-- controls -->
-      <div class="controls">
-        <button class="ctrl" onclick="prevTrack()">⏮</button>
-        <button class="ctrl play" id="play-btn" onclick="togglePlay()">▶</button>
-        <button class="ctrl" onclick="nextTrack()">⏭</button>
-      </div>
-
-      <!-- volume -->
-      <div class="vol-row">
-        <span class="vol-icon">🔈</span>
-        <input type="range" min="0" max="1" step="0.05" value="0.8" oninput="audio.volume=this.value">
-        <span class="vol-icon">🔊</span>
-      </div>
+    <div class="card panel">
+      <div class="slot-row" id="slotRow"></div>
+      <div class="piece-row" id="pieceRow" style="margin-top:16px;"></div>
+      <div class="celebrate" id="celebrateBox">조각을 모두 맞춰 보세요!</div>
+      <div class="footer-note">음성은 브라우저의 기본 음성 기능을 사용합니다. iPhone에서는 무음모드 해제 후 더 잘 들려요.</div>
     </div>
-
-    <!-- playlist -->
-    <div class="playlist-card">
-      <div class="pl-header">📋 Playlist</div>
-      <div class="pl-items" id="pl-items"></div>
-    </div>
-
-    <!-- other styles peek -->
-    <div class="other-styles-section">
-      <div class="other-styles-label">다른 유형 살짝 따라해보기</div>
-      <div class="other-styles-row" id="other-styles-row"></div>
-    </div>
-  </div>
+  </section>
 </div>
 
 <script>
-/* ─── DATA ─── */
-const TEACHERS = {
-  1: { name:'SJ Stable Teacher',       icon:'💙', ob:'청', hanja:'靑', theme:'cheong',
-       bg:'linear-gradient(160deg,#1a3fa0,#2255d4,#3d7fff)',
-       orb1:'rgba(100,160,255,0.45)', orb2:'rgba(61,127,255,0.3)', styleId:1 },
-  2: { name:'EP Activity Teacher',     icon:'❤️', ob:'적', hanja:'赤', theme:'jeok',
-       bg:'linear-gradient(160deg,#7a1010,#c01a1a,#ff3f3f)',
-       orb1:'rgba(255,100,100,0.45)', orb2:'rgba(255,63,63,0.3)', styleId:2 },
-  3: { name:'IF Prepared Teacher',     icon:'💛', ob:'황', hanja:'黃', theme:'hwang',
-       bg:'linear-gradient(160deg,#7a4400,#cc7700,#ffbf00)',
-       orb1:'rgba(255,200,50,0.45)', orb2:'rgba(255,191,0,0.3)', styleId:3 },
-  4: { name:'FN Relationship Teacher', icon:'🤍', ob:'백', hanja:'白', theme:'baek',
-       bg:'linear-gradient(160deg,#3a3830,#5a5648,#8a8470)',
-       orb1:'rgba(240,235,224,0.25)', orb2:'rgba(200,192,176,0.2)', styleId:4 },
-  5: { name:'TJ Learning Teacher',     icon:'🖤', ob:'흑', hanja:'黑', theme:'heuk',
-       bg:'linear-gradient(160deg,#111111,#1e1e1e,#2a2a2a)',
-       orb1:'rgba(120,120,120,0.3)', orb2:'rgba(80,80,80,0.2)', styleId:5 }
-};
+const ITEMS = [{"letter": "A", "phrase": "All eyes on me.", "image": "assets/01.png"}, {"letter": "B", "phrase": "Brush your teeth!", "image": "assets/02.png"}, {"letter": "C", "phrase": "Careful!", "image": "assets/03.png"}, {"letter": "D", "phrase": "Do not run.", "image": "assets/04.png"}, {"letter": "E", "phrase": "Eat your veggies.", "image": "assets/05.png"}, {"letter": "F", "phrase": "Five more minutes.", "image": "assets/06.png"}, {"letter": "G", "phrase": "Got it?", "image": "assets/07.png"}, {"letter": "H", "phrase": "How many times?", "image": "assets/08.png"}, {"letter": "I", "phrase": "I’m watching you.", "image": "assets/09.png"}, {"letter": "J", "phrase": "Just one bite.", "image": "assets/10.png"}, {"letter": "K", "phrase": "Knock it off.", "image": "assets/11.png"}, {"letter": "L", "phrase": "Look at this. Who did it?", "image": "assets/12.png"}, {"letter": "M", "phrase": "Mommy will know.", "image": "assets/13.png"}, {"letter": "N", "phrase": "No.", "image": "assets/14.png"}, {"letter": "O", "phrase": "One more time.", "image": "assets/15.png"}, {"letter": "P", "phrase": "Perfect! Let’s do it!", "image": "assets/16.png"}, {"letter": "Q", "phrase": "Quiet.", "image": "assets/17.png"}, {"letter": "R", "phrase": "Really?", "image": "assets/18.png"}, {"letter": "S", "phrase": "Stop talking.", "image": "assets/19.png"}, {"letter": "T", "phrase": "Turn the page.", "image": "assets/20.png"}, {"letter": "U", "phrase": "Use your words.", "image": "assets/21.png"}, {"letter": "V", "phrase": "Veggies in your mouth!", "image": "assets/22.png"}, {"letter": "W", "phrase": "What did I just say?", "image": "assets/23.png"}, {"letter": "X", "phrase": "X marks the spot.", "image": "assets/24.png"}, {"letter": "Y", "phrase": "You again?", "image": "assets/25.png"}, {"letter": "Z", "phrase": "Zero patience left.", "image": "assets/26.png"}];
+let index = 0;
+let selectedPiece = null;
+let fillCount = 0;
+let completed = new Set();
 
-const STYLES = [
-  {id:1, steps:['Warm up','Input','Action','Game','Speaking','Wrap up']},
-  {id:2, steps:['Hook','Story','Mission','Game','Speaking','Wrap up']},
-  {id:3, steps:['Warm up','Word','Practice','Game 1','Game 2','Wrap up']},
-  {id:4, steps:['Warm up','Word','Mission','Team game','Challenge','Wrap up']},
-  {id:5, steps:['Warm up','Word','Modeling','Role play','Game','Wrap up']}
-];
+const headerBadge = document.getElementById('headerBadge');
+const letterImage = document.getElementById('letterImage');
+const bigLetter = document.getElementById('bigLetter');
+const phraseText = document.getElementById('phraseText');
+const slotRow = document.getElementById('slotRow');
+const pieceRow = document.getElementById('pieceRow');
+const celebrateBox = document.getElementById('celebrateBox');
+const progress = document.getElementById('progress');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const speakBtn = document.getElementById('speakBtn');
 
-/* ─── STATE ─── */
-let selTeacher = null, selStyle = null;
-let playlist = [], curIdx = 0, playing = false;
-const audio = document.getElementById('audio');
-
-/* ─── TEACHER SELECT ─── */
-function selectTeacher(el) {
-  document.querySelectorAll('.tc-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  selTeacher = parseInt(el.dataset.t);
-  document.getElementById('intro-next-btn').disabled = false;
-  const t = TEACHERS[selTeacher];
-  document.body.className = 'theme-' + t.theme;
-}
-
-/* ─── NAVIGATE ─── */
-function goTo(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo(0,0);
-}
-
-/* ─── GO TO JUKEBOX (directly from teacher select) ─── */
-function goToJukebox(teacherId) {
-  // if called from other-style buttons, switch teacher context
-  if (teacherId) { selTeacher = teacherId; }
-  if (!selTeacher) return;
-
-  const t = TEACHERS[selTeacher];
-  selStyle = t.styleId; // AUTO-MAP
-
-  document.body.className = 'theme-' + t.theme;
-  document.getElementById('jb-bg').style.background = t.bg;
-  document.getElementById('jb-orb1').style.background = `radial-gradient(circle, ${t.orb1} 0%, transparent 70%)`;
-  document.getElementById('jb-orb2').style.background = `radial-gradient(circle, ${t.orb2} 0%, transparent 70%)`;
-  document.getElementById('jb-title-badge').textContent = `${t.hanja} · Style ${selStyle}`;
-  document.getElementById('np-teacher').textContent = `${t.name} · Style ${selStyle}`;
-
-  loadPlaylist();
-  renderPlaylist();
-  renderOtherStyles();
-  goTo('screen-jukebox');
-
-  // autoplay first available
-  const fi = playlist.findIndex(p=>p.url);
-  if (fi >= 0) { curIdx = fi; playTrack(fi); }
-}
-
-/* ─── OTHER STYLES BUTTONS ─── */
-function renderOtherStyles() {
-  const row = document.getElementById('other-styles-row');
-  row.innerHTML = '';
-  Object.entries(TEACHERS).forEach(([id, t]) => {
-    const tid = parseInt(id);
-    if (tid === selTeacher) return; // skip current
-    const style = STYLES.find(s=>s.id===t.styleId);
-    const btn = document.createElement('button');
-    btn.className = 'other-style-btn';
-    btn.onclick = () => {
-      if (playing) { audio.pause(); playing=false; }
-      goToJukebox(tid);
-    };
-    btn.innerHTML = `<span class="obs-hanja">${t.hanja}</span> ${t.name.split(' ')[0]} Style`;
-    row.appendChild(btn);
+function buildProgress() {
+  progress.innerHTML = '';
+  ITEMS.forEach((item, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (completed.has(i) ? ' done' : '');
+    progress.appendChild(dot);
   });
 }
 
-/* ─── PLAYLIST ─── */
-function skKey(styleId, step) {
-  return `bigcat_jukebox_s${styleId}_${step.replace(/\s+/g,'_').toLowerCase()}`;
+function shuffle(array) {
+  return [...array].sort(() => Math.random() - 0.5);
 }
 
-function loadPlaylist() {
-  const style = STYLES.find(s=>s.id===selStyle);
-  playlist = style.steps.map((step,i)=>{
-    try {
-      const raw = localStorage.getItem(skKey(selStyle, step));
-      if (raw) { const d=JSON.parse(raw); return {i,step,url:d.url,name:d.name||step,dur:d.duration||null}; }
-    } catch(e){}
-    return {i,step,url:null,name:step,dur:null};
+function speakCurrent() {
+  const item = ITEMS[index];
+  if (!window.speechSynthesis) return;
+  const text = `${item.letter}. ${item.phrase}`;
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'en-US';
+  utter.rate = 0.92;
+  utter.pitch = 1.05;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utter);
+}
+
+function celebrate() {
+  completed.add(index);
+  celebrateBox.textContent = `🎉 ${ITEMS[index].letter} - ${ITEMS[index].phrase}`;
+  buildProgress();
+  speakCurrent();
+}
+
+function renderPuzzle() {
+  const item = ITEMS[index];
+  headerBadge.textContent = item.letter;
+  bigLetter.textContent = item.letter;
+  phraseText.textContent = item.phrase;
+  letterImage.src = item.image;
+  letterImage.alt = `${item.letter} image`;
+  celebrateBox.textContent = '조각을 모두 맞춰 보세요!';
+  selectedPiece = null;
+  fillCount = 0;
+  slotRow.innerHTML = '';
+  pieceRow.innerHTML = '';
+  prevBtn.disabled = index === 0;
+  nextBtn.disabled = index === ITEMS.length - 1;
+
+  const targets = ['1','2','3'];
+  targets.forEach((id) => {
+    const slot = document.createElement('button');
+    slot.className = 'slot';
+    slot.type = 'button';
+    slot.dataset.id = id;
+    slot.textContent = '?';
+    slot.addEventListener('click', () => {
+      if (!selectedPiece || slot.classList.contains('filled')) return;
+      if (selectedPiece.dataset.id === slot.dataset.id) {
+        slot.classList.add('filled');
+        slot.textContent = item.letter;
+        selectedPiece.classList.add('done');
+        selectedPiece.disabled = true;
+        selectedPiece.classList.remove('selected');
+        selectedPiece = null;
+        fillCount += 1;
+        if (fillCount === 3) celebrate();
+      } else {
+        celebrateBox.textContent = '앗! 다른 조각을 눌러 보세요.';
+      }
+    });
+    slotRow.appendChild(slot);
   });
-}
 
-function renderPlaylist() {
-  const c = document.getElementById('pl-items');
-  c.innerHTML = '';
-  playlist.forEach((t,i)=>{
-    const el = document.createElement('div');
-    el.className = 'pl-item' + (i===curIdx?' active':'') + (!t.url?' no-song':'');
-    el.id = `pli-${i}`;
-    el.onclick = () => { if(t.url){curIdx=i;playTrack(i);} };
-    el.innerHTML = `
-      <span class="pl-n">${t.url?(i===curIdx&&playing?'▶':'♩'):'—'}</span>
-      <span class="pl-name">${t.name}</span>
-      <span class="pl-step-tag">${t.step}</span>
-      ${t.dur?`<span class="pl-dur">${t.dur}</span>`:''}
-    `;
-    c.appendChild(el);
+  shuffle(targets).forEach((id) => {
+    const piece = document.createElement('button');
+    piece.type = 'button';
+    piece.className = 'piece';
+    piece.dataset.id = id;
+    piece.innerHTML = `<div>${item.letter}</div><small>piece ${id}</small>`;
+    piece.addEventListener('click', () => {
+      document.querySelectorAll('.piece').forEach(p => p.classList.remove('selected'));
+      selectedPiece = piece;
+      piece.classList.add('selected');
+      celebrateBox.textContent = `조각 ${id} 선택! 맞는 자리를 눌러 주세요.`;
+    });
+    pieceRow.appendChild(piece);
   });
+
+  buildProgress();
 }
 
-/* ─── PLAYER ─── */
-function playTrack(idx) {
-  const t = playlist[idx];
-  if (!t || !t.url) return;
-  audio.src = t.url;
-  audio.play().then(()=>{
-    playing=true; updateUI(); renderPlaylist();
-    document.getElementById('np-step').textContent = t.step;
-    document.getElementById('np-song').textContent = t.name;
-    document.getElementById('disc').classList.add('spinning');
-    document.getElementById('viz').classList.add('on');
-  }).catch(()=>{playing=false;updateUI();});
-}
-
-function togglePlay() {
-  if (!audio.src || !playlist[curIdx]?.url) return;
-  if (playing) {
-    audio.pause(); playing=false;
-    document.getElementById('disc').classList.remove('spinning');
-    document.getElementById('viz').classList.remove('on');
-  } else {
-    audio.play(); playing=true;
-    document.getElementById('disc').classList.add('spinning');
-    document.getElementById('viz').classList.add('on');
-  }
-  updateUI();
-}
-
-function prevTrack() {
-  let i=curIdx-1; while(i>=0&&!playlist[i].url)i--;
-  if(i>=0){curIdx=i;playTrack(i);}
-}
-function nextTrack() {
-  let i=curIdx+1; while(i<playlist.length&&!playlist[i].url)i++;
-  if(i<playlist.length){curIdx=i;playTrack(i);}
-}
-
-function seekAudio(e) {
-  if(!audio.duration)return;
-  const r=e.currentTarget.getBoundingClientRect();
-  audio.currentTime=((e.clientX-r.left)/r.width)*audio.duration;
-}
-
-audio.addEventListener('timeupdate',()=>{
-  if(!audio.duration)return;
-  const p=(audio.currentTime/audio.duration)*100;
-  document.getElementById('prog-fill').style.width=p+'%';
-  document.getElementById('t-cur').textContent=fmt(audio.currentTime);
-  document.getElementById('t-tot').textContent=fmt(audio.duration);
+prevBtn.addEventListener('click', () => {
+  if (index > 0) { index -= 1; renderPuzzle(); }
 });
-audio.addEventListener('ended',()=>nextTrack());
-audio.addEventListener('pause',()=>{playing=false;updateUI();});
-audio.addEventListener('play',()=>{playing=true;updateUI();});
+nextBtn.addEventListener('click', () => {
+  if (index < ITEMS.length - 1) { index += 1; renderPuzzle(); }
+});
+speakBtn.addEventListener('click', speakCurrent);
 
-function updateUI() {
-  document.getElementById('play-btn').textContent=playing?'⏸':'▶';
-}
-function fmt(s) {
-  if(!s||isNaN(s))return'0:00';
-  return`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
-}
+window.addEventListener('load', () => {
+  renderPuzzle();
+  setTimeout(() => {
+    // iOS often needs a user gesture later, so this is just a soft try.
+    // The manual 다시 듣기 button is the reliable path.
+  }, 300);
+});
 </script>
 </body>
 </html>
